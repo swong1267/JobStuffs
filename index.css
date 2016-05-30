@@ -1,6 +1,26 @@
 html { height:100%; width: 100%; }
 body { height:100%; width: 100%; padding: 10px; }
 
+#filters {
+	display: inline-block;
+	margin: 10px;
+}
+
+#position {
+	max-width: 300px;
+	float: left;
+	margin-right: 10px;
+}
+
+.dropdown {
+	float: left;
+}
+
+.dropdown-menu {
+	max-height: 800%;
+	overflow: scroll;
+}
+
 .d-table{
    display:table;
    table-layout:fixed;
