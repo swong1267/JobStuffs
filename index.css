@@ -1,11 +1,35 @@
-.container {
-	padding: 15px;
-	margin: 0;
-	width: 100%;
-	height: 100%;
+html { height:100%; width: 100%; }
+body { height:100%; width: 100%; padding: 10px; }
+
+.d-table{
+   display:table;
+   table-layout:fixed;
+   height:90%;
+   width:100%; 
+}
+.d-row{
+   display : table-row;
+   padding: 0;
+   margin: 0;
+}
+.d-cell{
+   display : table-cell;
+   padding: 0;
+   margin: 0;
+}
+.first{
+   width : 50%;
+}
+.second{
+   width : 50%;
 }
 
-table {
-	width: 100%;
+.well {
 	height: 100%;
+	margin: 5px;
+	padding: 10px;
+}
+
+h3 {
+	margin: 0;
 }
