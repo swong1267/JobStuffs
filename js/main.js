@@ -59,6 +59,27 @@
                         pointRadius: 1,
                         pointHitRadius: 10,
                         data: [data[0]["2011"]*100, data[0]["2012"]*100, data[0]["2013"]*100, data[0]["2014"]*100, data[0]["2015"]*100],
+                    },
+                    {
+                        label: data[1].Job,
+                        fill: false,
+                        lineTension: 0.1,
+                        backgroundColor: "rgba(75,192,192,0.4)",
+                        borderColor: "rgba(75,192,192,1)",
+                        borderCapStyle: 'butt',
+                        borderDash: [],
+                        borderDashOffset: 0.0,
+                        borderJoinStyle: 'miter',
+                        pointBorderColor: "rgba(75,192,192,1)",
+                        pointBackgroundColor: "#fff",
+                        pointBorderWidth: 1,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                        pointHoverBorderColor: "rgba(220,220,220,1)",
+                        pointHoverBorderWidth: 2,
+                        pointRadius: 1,
+                        pointHitRadius: 10,
+                        data: [data[1]["2011"]*100, data[1]["2012"]*100, data[1]["2013"]*100, data[1]["2014"]*100, data[1]["2015"]*100],
                     }
                 ]
             };
@@ -70,6 +91,8 @@
             console.log("Historical Salary Data Loading Error");
         }
     });
+
+    
 
 
 })();
