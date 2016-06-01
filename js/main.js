@@ -5,7 +5,7 @@
     var mySalary = 90000;
 
     var companyChart = $("#companyChart");
-    var salaryChart = $("#salaryChart")
+    var salaryChart = $("#salaryChart");
 
     // Load Company Pay Data
     d3.csv("data/company_pay.csv", function(data) {
@@ -92,7 +92,10 @@
         }
     });
 
-    
+    var map = new Datamap({
+        element: document.getElementById('costMap'),
+        scope: 'usa'
+    });
 
 
 })();
