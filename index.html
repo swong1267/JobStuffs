@@ -14,29 +14,32 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
     <!-- Style -->
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="css/index.css">
 
-    <!-- Scripts --> 
-    <script type="text/javascript" src="index.js"></script>
+    <!-- D3 -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
-    <!-- D3 --> 
-    <script type="text/javascript" src="d3/d3.js"></script>
+    <!-- Chartjs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js" charset="utf-8"></script>
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/companies.js"></script>
 
     <title> Salary Gallery </title>
 
 </head>
 
 <body>
-    
+
     <h1>Salary Gallery</h1>
 
-    <div id="filters"> 
+    <div id="filters">
         <div id="position">
             <div class="input-group">
               <span class="input-group-btn">
                 <button class="btn btn-default" type="button">Go!</button>
               </span>
-              <input type="text" class="form-control" placeholder="Search for position title..."> 
+              <input type="text" class="form-control" placeholder="Search for position title...">
             </div><!-- /input-group -->
         </div>
         <div class="dropdown">
@@ -104,7 +107,7 @@
        <div class="d-row">
            <div class="d-cell first">
                <div class="well" id="history">
-                   <h3> Salary History </h3> 
+                   <h3> Salary History </h3>
                </div>
            </div>
            <div class="d-cell first">
