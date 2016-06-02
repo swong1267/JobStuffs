@@ -35,7 +35,6 @@
 
     d3.csv("data/historical_salary.csv", function(data) {
         if(data) {
-            console.log(data);
             var chartData = {
                 labels: ["2011", "2012", "2013", "2014", "2015"],
                 datasets: [
@@ -87,10 +86,28 @@
                 type: 'line',
                 data: chartData
             });
+            setUpJobTypeInput(data);
         } else {
             console.log("Historical Salary Data Loading Error");
         }
     });
+
+    function setUpJobTypeInput(data) {
+        var jobTypeOptions = [];
+        for(var i = 0; i < data.length; i++) {
+            var newJob = {
+                text: data[i].Job,
+                value: i
+            };
+            jobTypeOptions.push(newJob);
+        }
+        $('#jobTypeSelector').selectize({
+            options: jobTypeOptions,
+            create: false,
+            sortField: 'text'
+        });
+        $("#select-state").selectize();
+    }
 
     var map = new Datamap({
         element: document.getElementById('costMap'),

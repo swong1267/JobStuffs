@@ -7,7 +7,6 @@ body { height:100%; width: 100%; padding: 10px; }
 }
 
 #position {
-	max-width: 300px;
 	float: left;
 	margin-right: 10px;
 }
@@ -25,7 +24,7 @@ body { height:100%; width: 100%; padding: 10px; }
    display:table;
    table-layout:fixed;
    height:90%;
-   width:100%; 
+   width:100%;
 }
 .d-row{
    display : table-row;
@@ -48,6 +47,10 @@ body { height:100%; width: 100%; padding: 10px; }
 	height: 100%;
 	margin: 5px;
 	padding: 10px;
+}
+
+.control-group {
+	width: 300px;
 }
 
 h3 {
