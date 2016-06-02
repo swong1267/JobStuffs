@@ -22,7 +22,7 @@
             var myChart = new Chart(companyChart, {
                         type: 'bar',
                         data: {
-                            labels: [myJob, data[1].Name, data[2].Name],
+                            labels: ["My Salary", data[1].Name, data[2].Name],
                             datasets: [{
                                 label: 'Median Salary',
                                 data: [mySalary, data[1].Pay, data[2].Pay],
@@ -114,15 +114,19 @@
 
     // MARK: Dynamic Data Updating
 
+    // Update charts according to jobType
     function updateJobType(value) {
         var newJobType = salaryChartData.filter(function(arr_value) {
             return arr_value.Job === value;
         })[0];
         var currData = myLineSalaryChart.config.data.datasets[0];
-        console.log(currData);
+        //console.log(currData);
         currData.label = newJobType.Job;
         currData.data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
         myLineSalaryChart.update();
+        var barData = myBarChart.config.data.datasets[0];
+        barData.data[0] = newJobType["2015"];
+        myBarChart.update();
     }
 
     function updateState(value) {
