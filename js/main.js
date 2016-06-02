@@ -13,6 +13,8 @@
     var myLineSalaryChart;
     var myBarChart;
 
+    var map;
+
     // Load and Initialize all Data
 
     // Load Company Pay Data
@@ -107,9 +109,55 @@
     	});
     }
 
-    var map = new Datamap({
-        element: document.getElementById('costMap'),
-        scope: 'usa'
+    var selectedStates = {};
+    selectedStates.curr = "";
+    selectedStates.clicked = [];
+
+    d3.csv("data/cgi_states.csv", function(data) {
+        if(data) {
+            var mapData = {};
+            for(var i = 0; i < data.length; i++) {
+                mapData[data[i].State] = {
+                    CLI: data[i].Index
+                };
+            }
+            console.log(mapData);
+            map = new Datamap({
+                element: document.getElementById('costMap'),
+                scope: 'usa',
+                fills: {
+                    Selected: "blue",
+                    Clicked: "green",
+                    defaultFill: 'rgba(150, 150, 150, 0.72)'
+                },
+                data: mapData,
+                geographyConfig: {
+                    highlightOnHover: false,
+                    popupTemplate: function(geo, data) {
+                        return ['<div class="hoverinfo"><strong>',
+                                'CLI: ' + data.CLI,
+                                '</strong></div>'].join('');
+                    }
+                },
+                done: function(datamap) {
+                    datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                        var update = {};
+                        var state = geography.id;
+                        if(state !== selectedStates.curr && selectedStates.clicked.indexOf(state) === -1) {
+                            update[geography.id] = {fillKey: "Clicked"};
+                            selectedStates.clicked.push(state);
+                            map.updateChoropleth(update);
+                        } else if(state !== selectedStates.curr) {
+                            update[geography.id] = {fillKey: "defaultFill"};
+                            selectedStates.clicked.splice(selectedStates.clicked.indexOf(state),1);
+                            map.updateChoropleth(update);
+                        }
+                    });
+                }
+            });
+        } else {
+            console.log("Cost of Living Data Loading Error");
+        }
     });
 
     // MARK: Dynamic Data Updating
@@ -120,7 +168,6 @@
             return arr_value.Job === value;
         })[0];
         var currData = myLineSalaryChart.config.data.datasets[0];
-        //console.log(currData);
         currData.label = newJobType.Job;
         currData.data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
         myLineSalaryChart.update();
@@ -130,7 +177,10 @@
     }
 
     function updateState(value) {
-        console.log(value);
+        var update = {};
+        update[value] = {fillKey: "Selected"};
+        selectedStates.curr = value;
+        map.updateChoropleth(update, {reset: true});
     }
 
 })();
