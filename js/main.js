@@ -107,9 +107,37 @@
     	});
     }
 
+    var selectedStates = {};
+    selectedStates.curr = "";
+    selectedStates.clicked = [];
+
     var map = new Datamap({
         element: document.getElementById('costMap'),
-        scope: 'usa'
+        scope: 'usa',
+        fills: {
+            Selected: "blue",
+            Clicked: "green",
+            defaultFill: 'rgba(150, 150, 150, 0.72)'
+        },
+        data: {},
+        geographyConfig: {
+            highlightOnHover: false
+        },
+        done: function(datamap) {
+            datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                var update = {};
+                var state = geography.id;
+                if(state !== selectedStates.curr && selectedStates.clicked.indexOf(state) === -1) {
+                    update[geography.id] = {fillKey: "Clicked"};
+                    selectedStates.clicked.push(state);
+                    map.updateChoropleth(update);
+                } else if(state !== selectedStates.curr) {
+                    update[geography.id] = {fillKey: "defaultFill"};
+                    selectedStates.clicked.splice(selectedStates.clicked.indexOf(state),1);
+                    map.updateChoropleth(update);
+                }
+            });
+        }
     });
 
     // MARK: Dynamic Data Updating
@@ -130,7 +158,10 @@
     }
 
     function updateState(value) {
-        console.log(value);
+        var update = {};
+        update[value] = {fillKey: "Selected"};
+        selectedStates.curr = value;
+        map.updateChoropleth(update, {reset: true});
     }
 
 })();
