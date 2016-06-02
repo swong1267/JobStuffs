@@ -121,7 +121,6 @@
                     CLI: data[i].Index
                 };
             }
-            console.log(mapData);
             map = new Datamap({
                 element: document.getElementById('costMap'),
                 scope: 'usa',
@@ -172,15 +171,29 @@
         currData.data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
         myLineSalaryChart.update();
         var barData = myBarChart.config.data.datasets[0];
+        var newIndustryArr = companyChartData.filter(function(arr_value) {
+            return arr_value.Industry === newJobType.Industry;
+        });
+        console.log(newIndustryArr);
+        var companyOne = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
+        var companyTwo = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
+        myBarChart.config.data.labels[1] = companyOne.Name;
+        myBarChart.config.data.labels[2] = companyTwo.Name;
         barData.data[0] = newJobType["2015"];
+        barData.data[1] = companyOne.Pay;
+        barData.data[2] = companyTwo.Pay;
         myBarChart.update();
     }
 
     function updateState(value) {
         var update = {};
+        var lastState = selectedStates.curr;
+        if(lastState) {
+            update[lastState] = {fillKey: "defaultFill"};
+        }
         update[value] = {fillKey: "Selected"};
         selectedStates.curr = value;
-        map.updateChoropleth(update, {reset: true});
+        map.updateChoropleth(update);
     }
 
 })();
