@@ -1,10 +1,6 @@
 /*jshint esversion: 6 */
 (function() {
 
-    var myJob = "";
-    var mySalary = 0;
-    var myState = "";
-
     var companyChart = $("#companyChart");
     var salaryChart = $("#salaryChart");
 
@@ -13,7 +9,14 @@
     var myLineSalaryChart;
     var myBarChart;
 
+    var stateMapData;
     var map;
+
+    var federalTaxData;
+    var stateTaxData;
+
+    var federalTax;
+    var salary;
 
     // Load and Initialize all Data
 
@@ -41,8 +44,6 @@
                                     borderColor: 'rgba(255,99,132,1)',
                                     borderWidth: 1
                                 }
-
-
                             ]
                         },
                         options: {
@@ -145,6 +146,7 @@
 
     d3.csv("data/cgi_states.csv", function(data) {
         if(data) {
+            stateMapData = data;
             var mapData = {};
             for(var i = 0; i < data.length; i++) {
                 mapData[data[i].State] = {
@@ -186,6 +188,22 @@
             });
         } else {
             console.log("Cost of Living Data Loading Error");
+        }
+    });
+
+    d3.csv("data/federal_tax.csv", function(data) {
+        if(data) {
+            federalTaxData = data;
+        } else {
+            console.log("Federal Tax Data Loading Error");
+        }
+    });
+
+    d3.csv("data/state_tax.csv", function(data) {
+        if(data) {
+            stateTaxData = data;
+        } else {
+            console.log("State Tax Data Loading Error");
         }
     });
 
@@ -236,6 +254,28 @@
         barData[1].data[1] = companyTwo.Pay;
         barData[1].data[2] = companyThree.Pay;
         myBarChart.update();
+
+        //Update info section
+        salary = parseInt(newJobType["2015"]);
+        $('#my-job').text(newJobType.Job);
+        $('#job-salary').text("$" + salary.toFixed(2));
+        var rate = 0;
+        if(!salary) {salary = 0;}
+        for(var i = 0; i < federalTaxData.length; i++) {
+            if(federalTaxData[i].Max === -1) {
+                if(salary >= federalTaxData[i].Min) {
+                    rate = federalTaxData[i].Rate;
+                    break;
+                }
+            } else {
+                if(salary >= federalTaxData[i].Min && salary <= federalTaxData[i].Max) {
+                    rate = federalTaxData[i].Rate;
+                    break;
+                }
+            }
+        }
+        federalTax = rate*salary;
+        $('#federal-tax').text("$" + federalTax.toFixed(2));
     }
 
     function updateState(value) {
@@ -247,6 +287,44 @@
         update[value] = {fillKey: "Selected"};
         selectedStates.curr = value;
         map.updateChoropleth(update);
+        if(stateMapData) {
+            var stateVal = stateMapData.filter(function(arr_val) {
+                return value === arr_val.State;
+            });
+            $('#cli-index').text(stateVal[0].Index);
+        }
+        //Get State Tax
+        if(salary) {
+            var stateTaxList = stateTaxData.filter(function(arr_val) {
+                return arr_val.State === value;
+            });
+            var stateTax;
+            if(stateTaxList[0].Fed_Ind === 1) {
+                if(federalTax) {
+                    stateTax = stateTaxList[0].Rate * federalTax;
+                    $("#state-tax").text("$" + stateTax.toFixed(2));
+                }
+            } else {
+                var state_rate;
+                for(var i = 0; i < stateTaxList.length; i++) {
+                    if(stateTaxList[i].Max === -1) {
+                        if(salary >= stateTaxList[i].Min) {
+                            state_rate = stateTaxList[i].Rate;
+                            break;
+                        }
+                    } else {
+                        if(salary >= stateTaxList[i].Min && salary <= stateTaxList[i].Max) {
+                            state_rate = stateTaxList[i].Rate;
+                            break;
+                        }
+                    }
+                }
+                if(state_rate) {
+                    stateTax = state_rate * salary;
+                    $("#state-tax").text("$" + stateTax.toFixed(2));
+                }
+            }
+        }
     }
 
 })();
