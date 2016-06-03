@@ -18,6 +18,9 @@
     var federalTax;
     var salary;
     var selectedState;
+    var selectedStateCLI;
+    var comparedState;
+    var comparedStateCLI;
 
     // Load and Initialize all Data
 
@@ -75,15 +78,15 @@
                 labels: ["2011", "2012", "2013", "2014", "2015"],
                 datasets: [
                     {
-                        label: "Comparable Job",
-                        borderColor: "rgba(185, 185, 185, 0.9)",
+                        label: "My Job",
+                        backgroundColor: 'rgba(119, 214, 125, 0.37)',
+                        borderColor: "rgb(71, 172, 46)",
                         fill: false,
                         data: []
                     },
                     {
-                        label: "My Job",
-                        backgroundColor: 'rgba(119, 214, 125, 0.37)',
-                        borderColor: "rgb(71, 172, 46)",
+                        label: "Comparable Job",
+                        borderColor: "rgba(185, 185, 185, 0.9)",
                         fill: false,
                         data: []
                     },
@@ -143,7 +146,7 @@
 
     var selectedStates = {};
     selectedStates.curr = "";
-    selectedStates.clicked = [];
+    selectedStates.clicked = "";
 
     d3.csv("data/cgi_states.csv", function(data) {
         if(data) {
@@ -175,14 +178,26 @@
                     datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
                         var update = {};
                         var state = geography.id;
-                        if(state !== selectedStates.curr && selectedStates.clicked.indexOf(state) === -1) {
-                            update[geography.id] = {fillKey: "Clicked"};
-                            selectedStates.clicked.push(state);
-                            map.updateChoropleth(update);
-                        } else if(state !== selectedStates.curr) {
+                        if(state !== selectedStates.curr && selectedStates.clicked === state) {
                             update[geography.id] = {fillKey: "defaultFill"};
-                            selectedStates.clicked.splice(selectedStates.clicked.indexOf(state),1);
+                            selectedStates.clicked = "";
                             map.updateChoropleth(update);
+                            $("#compared-state").text("");
+                            $("#delta-state").text("");
+                        } else if(state !== selectedStates.curr) {
+                            update[state] = {fillKey: "Clicked"};
+                            update[selectedStates.clicked] = {fillKey: "defaultFill"};
+                            map.updateChoropleth(update);
+                            selectedStates.clicked = state;
+                            var stateNameList = stateMapData.filter(function(arr_val) {
+                                return arr_val.State === state;
+                            });
+                            $("#compared-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
+                            comparedStateCLI = stateNameIndex[0].Index;
+                            if(selectedStateCLI) {
+                                var delta = selectedStateCLI - stateNameList[0].Index;
+                                $("#delta-state").text(delta.toFixed(2));
+                            }
                         }
                     });
                 }
@@ -302,6 +317,17 @@
     }
 
     function setStateTax(value) {
+        var stateNameList = stateMapData.filter(function(arr_val) {
+            return arr_val.State === value;
+        });
+        $("#selected-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
+        selectedStateCLI = stateNameList[0].Index;
+        if(comparedStateCLI) {
+            var delta = stateNameList[0].Index-comparedStateCLI;
+            $("#delta-state").text(delta.toFixed(2));
+        } else {
+            $("#delta-state").text("");
+        }
         //Get State Tax
         if(salary) {
             var stateTaxList = stateTaxData.filter(function(arr_val) {
