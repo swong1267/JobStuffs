@@ -9,50 +9,80 @@ body { height:100%; width: 100%; padding: 10px; }
 #position {
 	float: left;
 	margin-right: 10px;
+	display: inline-block;
+	position: relative
 }
 
-.dropdown {
-	float: left;
-}
-
-.dropdown-menu {
-	max-height: 800%;
-	overflow: scroll;
-}
-
-.d-table{
-   display:table;
-   table-layout:fixed;
-   height:90%;
-   width:100%;
-}
-.d-row{
-   display : table-row;
-   padding: 0;
-   margin: 0;
-}
-.d-cell{
-   display : table-cell;
-   padding: 0;
-   margin: 0;
-}
-.first{
-   width : 50%;
-}
-.second{
-   width : 50%;
-}
-
-.well {
+div.well {
 	height: 100%;
-	margin: 5px;
-	padding: 10px;
+	margin: 0;
+	padding: 20px;
+	background-color: white;
+	border-color: #8AC23C;
+	border-width: 2px;
 }
-
 .control-group {
 	width: 300px;
 }
 
-h3 {
+/* Prettify */
+
+h3.header { 
 	margin: 0;
+	padding: 0;
 }
+
+#nav {
+	margin: 0;
+    border: 0;
+    padding: 0;
+    background-color: #8AC23C;
+    color: white;
+    height: 100px;
+}
+
+.navbar-brand {
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-brand img {
+    height: 250%;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+h1, h2 {
+    color: white;
+}
+
+#state {
+	float: left;
+	margin-right: 10px;
+	display: inline-block;
+	position: relative
+}
+
+div.col-left {
+	padding-right: 2.5px;
+}
+
+div.col-right {
+	padding-left: 2.5px;
+}
+
+div.row-top {
+	padding-top: 5px;
+}
+
+div.row-bottom {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+
+
+
+
+
+
