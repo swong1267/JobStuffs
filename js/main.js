@@ -17,6 +17,7 @@
 
     var federalTax;
     var salary;
+    var selectedState;
 
     // Load and Initialize all Data
 
@@ -262,7 +263,7 @@
         var rate = 0;
         if(!salary) {salary = 0;}
         for(var i = 0; i < federalTaxData.length; i++) {
-            if(federalTaxData[i].Max === -1) {
+            if(federalTaxData[i].Max == -1) {
                 if(salary >= federalTaxData[i].Min) {
                     rate = federalTaxData[i].Rate;
                     break;
@@ -276,9 +277,13 @@
         }
         federalTax = rate*salary;
         $('#federal-tax').text("$" + federalTax.toFixed(2));
+        if(selectedState) {
+            setStateTax(selectedState);
+        }
     }
 
     function updateState(value) {
+        selectedState = value;
         var update = {};
         var lastState = selectedStates.curr;
         if(lastState) {
@@ -293,6 +298,10 @@
             });
             $('#cli-index').text(stateVal[0].Index);
         }
+        setStateTax(value);
+    }
+
+    function setStateTax(value) {
         //Get State Tax
         if(salary) {
             var stateTaxList = stateTaxData.filter(function(arr_val) {
@@ -307,21 +316,21 @@
             } else {
                 var state_rate;
                 for(var i = 0; i < stateTaxList.length; i++) {
-                    if(stateTaxList[i].Max === -1) {
+                    if(stateTaxList[i].Max == -1) {
                         if(salary >= stateTaxList[i].Min) {
                             state_rate = stateTaxList[i].Rate;
+                            stateTax = state_rate * salary;
+                            $("#state-tax").text("$" + stateTax.toFixed(2));
                             break;
                         }
                     } else {
                         if(salary >= stateTaxList[i].Min && salary <= stateTaxList[i].Max) {
                             state_rate = stateTaxList[i].Rate;
+                            stateTax = state_rate * salary;
+                            $("#state-tax").text("$" + stateTax.toFixed(2));
                             break;
                         }
                     }
-                }
-                if(state_rate) {
-                    stateTax = state_rate * salary;
-                    $("#state-tax").text("$" + stateTax.toFixed(2));
                 }
             }
         }
