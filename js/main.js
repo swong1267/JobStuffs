@@ -34,16 +34,16 @@
                                 {
                                     label: 'My Salary',
                                     data: [0,0,0],
-                                    backgroundColor: 'rgba(119, 214, 125, 0.37)',
-                                    borderColor: 'rgb(71, 172, 46)',
-                                    borderWidth: 1
+                                    backgroundColor: 'rgba(75, 144, 64, 0.37)', //Green
+                                    borderColor: 'rgb(75, 144, 64)',
+                                    borderWidth: 2
                                 },
                                 {
                                     label: 'Top Companies in Industry',
                                     data: [0,0,0],
-                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                    borderColor: 'rgba(255,99,132,1)',
-                                    borderWidth: 1
+                                    backgroundColor: 'rgba(247,149,52, 0.2)', //Orange
+                                    borderColor: 'rgba(247,149,52,1)',
+                                    borderWidth: 2
                                 }
                             ]
                         },
@@ -76,20 +76,25 @@
                 datasets: [
                     {
                         label: "Comparable Job",
-                        borderColor: "rgba(185, 185, 185, 0.9)",
+                        backgroundColor: 'rgba(247,149,52, 0.37)',
+                        borderColor: "rgba(247,149,52, 0.9)",
+                        borderWidth: 2,
                         fill: false,
                         data: []
                     },
                     {
                         label: "My Job",
-                        backgroundColor: 'rgba(119, 214, 125, 0.37)',
-                        borderColor: "rgb(71, 172, 46)",
+                        backgroundColor: 'rgba(75, 144, 64, 0.37)',
+                        borderColor: "rgb(75, 144, 64)",
+                        borderWidth: 2,
                         fill: false,
                         data: []
                     },
                     {
                         label: "Comparable Job",
-                        borderColor: "rgba(185, 185, 185, 0.9)",
+                        backgroundColor: 'rgba(247,149,52, 0.37)',
+                        borderColor: "rgba(247,149,52, 0.9)",
+                        borderWidth: 2,
                         fill: false,
                         data: []
                     }
@@ -158,8 +163,8 @@
                 element: document.getElementById('costMap'),
                 scope: 'usa',
                 fills: {
-                    Selected: "blue",
-                    Clicked: "green",
+                    Selected: "rgba(75, 144, 64, 1)",
+                    Clicked: "rgba(247,149,52, 1)",
                     defaultFill: 'rgba(150, 150, 150, 0.72)'
                 },
                 data: mapData,
@@ -259,7 +264,7 @@
         //Update info section
         salary = parseInt(newJobType["2015"]);
         $('#my-job').text(newJobType.Job);
-        $('#job-salary').text("$" + salary.toFixed(2));
+        $('#job-salary').text("$ " + addCommas(salary.toFixed(2)));
         var rate = 0;
         if(!salary) {salary = 0;}
         for(var i = 0; i < federalTaxData.length; i++) {
@@ -276,7 +281,8 @@
             }
         }
         federalTax = rate*salary;
-        $('#federal-tax').text("$" + federalTax.toFixed(2));
+        federalTax = addCommas(federalTax.toFixed(2)); 
+        $('#federal-tax').text("$ " + federalTax);
         if(selectedState) {
             setStateTax(selectedState);
         }
@@ -301,6 +307,19 @@
         setStateTax(value);
     }
 
+    function addCommas(nStr)
+    {
+        nStr += '';
+        x = nStr.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return x1 + x2;
+    }
+
     function setStateTax(value) {
         //Get State Tax
         if(salary) {
@@ -311,7 +330,7 @@
             if(stateTaxList[0].Fed_Ind === 1) {
                 if(federalTax) {
                     stateTax = stateTaxList[0].Rate * federalTax;
-                    $("#state-tax").text("$" + stateTax.toFixed(2));
+                    $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
                 }
             } else {
                 var state_rate;
@@ -320,14 +339,14 @@
                         if(salary >= stateTaxList[i].Min) {
                             state_rate = stateTaxList[i].Rate;
                             stateTax = state_rate * salary;
-                            $("#state-tax").text("$" + stateTax.toFixed(2));
+                            $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
                             break;
                         }
                     } else {
                         if(salary >= stateTaxList[i].Min && salary <= stateTaxList[i].Max) {
                             state_rate = stateTaxList[i].Rate;
                             stateTax = state_rate * salary;
-                            $("#state-tax").text("$" + stateTax.toFixed(2));
+                            $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
                             break;
                         }
                     }
