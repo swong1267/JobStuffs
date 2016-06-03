@@ -1,5 +1,5 @@
 html { height:100%; width: 100%; }
-body { height:100%; width: 100%; padding: 10px; }
+body { height:100%; width: 100%; padding: 5px; color: #6D6E72;}
 
 #filters {
 	display: inline-block;
@@ -30,6 +30,7 @@ div.well {
 h3.header { 
 	margin: 0;
 	padding: 0;
+	color: #6D6E72;
 }
 
 #nav {
@@ -79,6 +80,33 @@ div.row-bottom {
 	padding-top: 5px;
 	padding-bottom: 5px;
 }
+
+#figures {
+	height: 386px;
+}
+
+.panel#figure-panel {
+	margin: 20px;
+	margin-top: 60px;
+	color: #6D6E72;
+	font-size: 18px;
+}
+
+.panel#map-panel {
+	display: inline-block;
+	margin: 0;
+	margin-left: 20;
+	padding: 0;
+	position: relative;
+	bottom: 120px;
+	width: 250px;
+	color: #6D6E72;
+}
+
+#costMap {
+	display: inline-block;
+}
+
 
 
 
