@@ -198,7 +198,8 @@
                                 return arr_val.State === state;
                             });
                             $("#compared-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
-                            comparedStateCLI = stateNameIndex[0].Index;
+                            comparedStateCLI = stateNameList[0].Index;
+                            console.log(selectedStateCLI);
                             if(selectedStateCLI) {
                                 var delta = selectedStateCLI - stateNameList[0].Index;
                                 $("#delta-state").text(delta.toFixed(2));
