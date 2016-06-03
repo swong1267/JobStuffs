@@ -1,33 +1,66 @@
 /*jshint esversion: 6 */
 (function() {
 
-    var myJob = "Software Engineer";
-    var mySalary = 90000;
+    var myJob = "";
+    var mySalary = 0;
+    var myState = "";
 
     var companyChart = $("#companyChart");
     var salaryChart = $("#salaryChart");
 
+    var salaryChartData;
+    var companyChartData;
+    var myLineSalaryChart;
+    var myBarChart;
+
+    var map;
+
+    // Load and Initialize all Data
+
     // Load Company Pay Data
     d3.csv("data/company_pay.csv", function(data) {
         if(data) {
+            companyChartData = data;
             var myChart = new Chart(companyChart, {
+                        title: {text: "Top Company Salaries in Industry"},
                         type: 'bar',
                         data: {
-                            labels: [myJob, data[1].Name, data[2].Name],
-                            datasets: [{
-                                label: 'Median Salary',
-                                data: [mySalary, data[1].Pay, data[2].Pay],
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                borderColor: 'rgba(255,99,132,1)',
-                                borderWidth: 1
-                            }]
+                            labels: ["My Salary", data[1].Name, data[2].Name],
+                            datasets: [
+                                {
+                                    label: 'My Salary',
+                                    data: [0,0,0],
+                                    backgroundColor: 'rgba(119, 214, 125, 0.37)',
+                                    borderColor: 'rgb(71, 172, 46)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Top Companies in Industry',
+                                    data: [0,0,0],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255,99,132,1)',
+                                    borderWidth: 1
+                                }
+
+
+                            ]
                         },
                         options: {
-                            responsive: true,
-                            responsiveAnimationDuration: 0,
-                            maintainAspectRatio: true
+                            scales: {
+                                xAxes: [{
+                                    stacked: true
+                                }],
+                                yAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true,
+                                        suggestedMax: 100000
+                                    }
+                                }]
+                            },
                         }
             });
+            myBarChart = myChart;
         } else {
             console.log("Company Data Loading Error");
         }
@@ -35,67 +68,185 @@
 
     d3.csv("data/historical_salary.csv", function(data) {
         if(data) {
-            console.log(data);
+            salaryChartData = data;
             var chartData = {
                 labels: ["2011", "2012", "2013", "2014", "2015"],
                 datasets: [
                     {
-                        label: data[0].Job,
+                        label: "Comparable Job",
+                        borderColor: "rgba(185, 185, 185, 0.9)",
                         fill: false,
-                        lineTension: 0.1,
-                        backgroundColor: "rgba(75,192,192,0.4)",
-                        borderColor: "rgba(75,192,192,1)",
-                        borderCapStyle: 'butt',
-                        borderDash: [],
-                        borderDashOffset: 0.0,
-                        borderJoinStyle: 'miter',
-                        pointBorderColor: "rgba(75,192,192,1)",
-                        pointBackgroundColor: "#fff",
-                        pointBorderWidth: 1,
-                        pointHoverRadius: 5,
-                        pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                        pointHoverBorderColor: "rgba(220,220,220,1)",
-                        pointHoverBorderWidth: 2,
-                        pointRadius: 1,
-                        pointHitRadius: 10,
-                        data: [data[0]["2011"]*100, data[0]["2012"]*100, data[0]["2013"]*100, data[0]["2014"]*100, data[0]["2015"]*100],
+                        data: []
                     },
                     {
-                        label: data[1].Job,
+                        label: "My Job",
+                        backgroundColor: 'rgba(119, 214, 125, 0.37)',
+                        borderColor: "rgb(71, 172, 46)",
                         fill: false,
-                        lineTension: 0.1,
-                        backgroundColor: "rgba(75,192,192,0.4)",
-                        borderColor: "rgba(75,192,192,1)",
-                        borderCapStyle: 'butt',
-                        borderDash: [],
-                        borderDashOffset: 0.0,
-                        borderJoinStyle: 'miter',
-                        pointBorderColor: "rgba(75,192,192,1)",
-                        pointBackgroundColor: "#fff",
-                        pointBorderWidth: 1,
-                        pointHoverRadius: 5,
-                        pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                        pointHoverBorderColor: "rgba(220,220,220,1)",
-                        pointHoverBorderWidth: 2,
-                        pointRadius: 1,
-                        pointHitRadius: 10,
-                        data: [data[1]["2011"]*100, data[1]["2012"]*100, data[1]["2013"]*100, data[1]["2014"]*100, data[1]["2015"]*100],
+                        data: []
+                    },
+                    {
+                        label: "Comparable Job",
+                        borderColor: "rgba(185, 185, 185, 0.9)",
+                        fill: false,
+                        data: []
                     }
                 ]
             };
             var myLineChart = new Chart(salaryChart, {
                 type: 'line',
-                data: chartData
+                data: chartData,
+                options: {
+                    scales: {
+                        yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                suggestedMax: 100000
+                            }
+                        }]
+                    }
+                }
             });
+            myLineSalaryChart = myLineChart;
+            setUpInputs(data, myLineChart);
         } else {
             console.log("Historical Salary Data Loading Error");
         }
     });
 
-    var map = new Datamap({
-        element: document.getElementById('costMap'),
-        scope: 'usa'
+    function setUpInputs(data, myLineChart) {
+        var jobTypeOptions = [];
+        for(var i = 0; i < data.length; i++) {
+            var newJob = {
+                text: data[i].Job,
+                value: data[i].Job
+            };
+            jobTypeOptions.push(newJob);
+        }
+        $('#jobTypeSelector').selectize({
+            options: jobTypeOptions,
+            create: false,
+            sortField: 'text',
+            onChange: function(value) {
+                updateJobType(value, myLineChart.config.data);
+            }
+        });
+        var $select = $('#select-state').selectize({
+    		onChange: function(value) {
+                updateState(value);
+            }
+    	});
+    }
+
+    var selectedStates = {};
+    selectedStates.curr = "";
+    selectedStates.clicked = [];
+
+    d3.csv("data/cgi_states.csv", function(data) {
+        if(data) {
+            var mapData = {};
+            for(var i = 0; i < data.length; i++) {
+                mapData[data[i].State] = {
+                    CLI: data[i].Index
+                };
+            }
+            map = new Datamap({
+                element: document.getElementById('costMap'),
+                scope: 'usa',
+                fills: {
+                    Selected: "blue",
+                    Clicked: "green",
+                    defaultFill: 'rgba(150, 150, 150, 0.72)'
+                },
+                data: mapData,
+                geographyConfig: {
+                    highlightOnHover: false,
+                    popupTemplate: function(geo, data) {
+                        return ['<div class="hoverinfo"><strong>',
+                                geo.properties.name + ': ' + data.CLI,
+                                '</strong></div>'].join('');
+                    }
+                },
+                done: function(datamap) {
+                    datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                        var update = {};
+                        var state = geography.id;
+                        if(state !== selectedStates.curr && selectedStates.clicked.indexOf(state) === -1) {
+                            update[geography.id] = {fillKey: "Clicked"};
+                            selectedStates.clicked.push(state);
+                            map.updateChoropleth(update);
+                        } else if(state !== selectedStates.curr) {
+                            update[geography.id] = {fillKey: "defaultFill"};
+                            selectedStates.clicked.splice(selectedStates.clicked.indexOf(state),1);
+                            map.updateChoropleth(update);
+                        }
+                    });
+                }
+            });
+        } else {
+            console.log("Cost of Living Data Loading Error");
+        }
     });
 
+    // MARK: Dynamic Data Updating
+
+    // Update charts according to jobType
+    function updateJobType(value) {
+        //Update Salary Chart
+        var newJobType = salaryChartData.filter(function(arr_value) {
+            return arr_value.Job === value;
+        })[0];
+        //Get Industry Companies
+        var comparableJobs = salaryChartData.filter(function(arr_val) {
+            return arr_val.Industry === newJobType.Industry;
+        });
+        var jobOne = comparableJobs[Math.floor(Math.random()*comparableJobs.length)];
+        var jobTwo;
+        while(!jobTwo || (jobTwo === jobOne)) {
+            jobTwo = comparableJobs[Math.floor(Math.random()*comparableJobs.length)];
+        }
+        var currData = myLineSalaryChart.config.data.datasets;
+        currData[0].label = jobOne.Job;
+        currData[0].data = [jobOne["2011"], jobOne["2012"], jobOne["2013"], jobOne["2014"], jobOne["2015"]];
+        currData[2].label = jobTwo.Job;
+        currData[2].data = [jobTwo["2011"], jobTwo["2012"], jobTwo["2013"], jobTwo["2014"], jobTwo["2015"]];
+        currData[1].label = newJobType.Job;
+        currData[1].data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
+        myLineSalaryChart.update();
+
+        //Update Bar Chart
+        var barData = myBarChart.config.data.datasets;
+        var newIndustryArr = companyChartData.filter(function(arr_value) {
+            return arr_value.Industry === newJobType.Industry;
+        });
+        var companyOne = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
+        var companyTwo, companyThree;
+        while(!companyTwo || (companyTwo === companyOne)) {
+            companyTwo = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
+        }
+        while(!companyThree || (companyThree === companyOne) || (companyThree === companyTwo)) {
+            companyThree = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
+        }
+        myBarChart.config.data.labels[0] = companyOne.Name;
+        myBarChart.config.data.labels[1] = companyTwo.Name;
+        myBarChart.config.data.labels[2] = companyThree.Name;
+        barData[0].data[0] = barData[0].data[1] = barData[0].data[2] = newJobType["2015"];
+        barData[1].data[0] = companyOne.Pay;
+        barData[1].data[1] = companyTwo.Pay;
+        barData[1].data[2] = companyThree.Pay;
+        myBarChart.update();
+    }
+
+    function updateState(value) {
+        var update = {};
+        var lastState = selectedStates.curr;
+        if(lastState) {
+            update[lastState] = {fillKey: "defaultFill"};
+        }
+        update[value] = {fillKey: "Selected"};
+        selectedStates.curr = value;
+        map.updateChoropleth(update);
+    }
 
 })();
