@@ -1,19 +1,17 @@
 /*jshint esversion: 6 */
 (function() {
 
-    var companyChart = $("#companyChart");
-    var salaryChart = $("#salaryChart");
-
+    // Store Global Data Arrays
     var salaryChartData;
     var companyChartData;
-    var myLineSalaryChart;
-    var myBarChart;
-
-    var stateMapData;
-    var map;
-
+    var stateMapCLIData;
     var federalTaxData;
     var stateTaxData;
+
+    // Data Visualizations on Screen
+    var myLineSalaryChart;
+    var myBarChart;
+    var myMap;
 
     var federalTax;
     var salary;
@@ -22,109 +20,160 @@
     var comparedState;
     var comparedStateCLI;
 
-    // Load and Initialize all Data
+    var selectedStates = {};
+    selectedStates.curr = "";
+    selectedStates.clicked = "";
 
-    // Load Company Pay Data
+    // Colors
+    var colorScheme = {};
+    colorScheme.primaryBackgroundColor = 'rgba(75, 144, 64, 0.37)';
+    colorScheme.primaryColor = 'rgb(75, 144, 64)';
+    colorScheme.companyChartSecondaryBackgroundColor = 'rgba(247,149,52, 0.2)';
+    colorScheme.companyChartSecondaryColor = 'rgba(247,149,52,1)';
+    colorScheme.salaryHistorySecondaryBackgroundColor = '';
+    colorScheme.salaryHistorySecondaryColor = '';
+
+    // MARK: Load and Initialize all Data
+
+    // Federal Tax Data
+    d3.csv("data/federal_tax.csv", function(data) {
+        if(data) {
+            federalTaxData = data;
+        } else {
+            console.log("Federal Tax Data Loading Error");
+        }
+    });
+
+    // State Tax Data
+    d3.csv("data/state_tax.csv", function(data) {
+        if(data) {
+            stateTaxData = data;
+        } else {
+            console.log("State Tax Data Loading Error");
+        }
+    });
+
+    // Fortune 500 Company Pay Data
     d3.csv("data/company_pay.csv", function(data) {
         if(data) {
             companyChartData = data;
-            var myChart = new Chart(companyChart, {
-                        title: {text: "Top Company Salaries in Industry"},
-                        type: 'bar',
-                        data: {
-                            labels: ["My Salary", data[1].Name, data[2].Name],
-                            datasets: [
-                                {
-                                    label: 'My Salary',
-                                    data: [0,0,0],
-                                    backgroundColor: 'rgba(75, 144, 64, 0.37)', //Green
-                                    borderColor: 'rgb(75, 144, 64)',
-                                    borderWidth: 2
-                                },
-                                {
-                                    label: 'Top Companies in Industry',
-                                    data: [0,0,0],
-                                    backgroundColor: 'rgba(247,149,52, 0.2)', //Orange
-                                    borderColor: 'rgba(247,149,52,1)',
-                                    borderWidth: 2
-                                }
-                            ]
-                        },
-                        options: {
-                            scales: {
-                                xAxes: [{
-                                    stacked: true
-                                }],
-                                yAxes: [{
-                                    display: true,
-                                    ticks: {
-                                        beginAtZero: true,
-                                        suggestedMax: 100000
-                                    }
-                                }]
-                            },
-                        }
-            });
-            myBarChart = myChart;
+            loadCompanyPay(data);
         } else {
             console.log("Company Data Loading Error");
         }
     });
 
+    // Historical Salary Data
     d3.csv("data/historical_salary.csv", function(data) {
         if(data) {
             salaryChartData = data;
-            var chartData = {
-                labels: ["2011", "2012", "2013", "2014", "2015"],
-                datasets: [
-                    {
-                        label: "Comparable Job",
-                        backgroundColor: 'rgba(247,149,52, 0.37)',
-                        borderColor: "rgba(247,149,52, 0.9)",
-                        borderWidth: 2,
-                        fill: false,
-                        data: []
-                    },
-                    {
-                        label: "My Job",
-                        backgroundColor: 'rgba(75, 144, 64, 0.37)',
-                        borderColor: "rgb(75, 144, 64)",
-                        borderWidth: 2,
-                        fill: false,
-                        data: []
-                    },
-                    {
-                        label: "Comparable Job",
-                        backgroundColor: 'rgba(247,149,52, 0.37)',
-                        borderColor: "rgba(247,149,52, 0.9)",
-                        borderWidth: 2,
-                        fill: false,
-                        data: []
-                    }
-                ]
-            };
-            var myLineChart = new Chart(salaryChart, {
-                type: 'line',
-                data: chartData,
-                options: {
-                    scales: {
-                        yAxes: [{
-                            display: true,
-                            ticks: {
-                                beginAtZero: true,
-                                suggestedMax: 100000
-                            }
-                        }]
-                    }
-                }
-            });
-            myLineSalaryChart = myLineChart;
-            setUpInputs(data, myLineChart);
+            loadHistoricalSalaryData(data);
         } else {
             console.log("Historical Salary Data Loading Error");
         }
     });
 
+    // States Cost of Living Data
+    d3.csv("data/cgi_states.csv", function(data) {
+        if(data) {
+            stateMapCLIData = data;
+            loadCLIData(data);
+        } else {
+            console.log("Cost of Living Data Loading Error");
+        }
+    });
+
+    // MARK: Data Set Up
+
+    // Load Company Bar Chart
+    function loadCompanyPay(data) {
+        var myChart = new Chart(companyChart, {
+                    type: 'bar',
+                    data: {
+                        labels: ["My Salary", data[1].Name, data[2].Name],
+                        datasets: [
+                            {
+                                label: 'My Salary',
+                                data: [0,0,0],
+                                backgroundColor: colorScheme.primaryBackgroundColor,
+                                borderColor: colorScheme.primaryColor,
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Top Companies in Industry',
+                                data: [0,0,0],
+                                backgroundColor: colorScheme.companyChartSecondaryBackgroundColor, //Orange
+                                borderColor: colorScheme.companyChartSecondaryColor,
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100000
+                                }
+                            }]
+                        },
+                    }
+        });
+        myBarChart = myChart;
+    }
+
+    // Set up historical line chart data
+    function loadHistoricalSalaryData(data) {
+        var chartData = {
+            labels: ["2011", "2012", "2013", "2014", "2015"],
+            datasets: [
+                {
+                    label: "My Job",
+                    backgroundColor: colorScheme.primaryBackgroundColor,
+                    borderColor: colorScheme.primaryColor,
+                    borderWidth: 2,
+                    fill: false,
+                    data: []
+                },
+                {
+                    label: "Comparable Job",
+                    backgroundColor: 'rgba(247,149,52, 0.37)',
+                    borderColor: "rgba(247,149,52, 0.9)",
+                    borderWidth: 2,
+                    fill: false,
+                    data: []
+                },
+                {
+                    label: "Comparable Job",
+                    backgroundColor: 'rgba(247,149,52, 0.37)',
+                    borderColor: "rgba(247,149,52, 0.9)",
+                    borderWidth: 2,
+                    fill: false,
+                    data: []
+                }
+            ]
+        };
+        var myLineChart = new Chart(salaryChart, {
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            suggestedMax: 100000
+                        }
+                    }]
+                }
+            }
+        });
+        myLineSalaryChart = myLineChart;
+        setUpInputs(data, myLineChart);
+    }
+
+    // Set Up Input Options
     function setUpInputs(data, myLineChart) {
         var jobTypeOptions = [];
         for(var i = 0; i < data.length; i++) {
@@ -143,91 +192,66 @@
             }
         });
         var $select = $('#select-state').selectize({
-    		onChange: function(value) {
+            onChange: function(value) {
                 updateState(value);
             }
-    	});
+        });
     }
 
-    var selectedStates = {};
-    selectedStates.curr = "";
-    selectedStates.clicked = "";
-
-    d3.csv("data/cgi_states.csv", function(data) {
-        if(data) {
-            stateMapData = data;
-            var mapData = {};
-            for(var i = 0; i < data.length; i++) {
-                mapData[data[i].State] = {
-                    CLI: data[i].Index
-                };
-            }
-            map = new Datamap({
-                element: document.getElementById('costMap'),
-                scope: 'usa',
-                fills: {
-                    Selected: "rgba(75, 144, 64, 1)",
-                    Clicked: "rgba(247,149,52, 1)",
-                    defaultFill: 'rgba(150, 150, 150, 0.72)'
-                },
-                data: mapData,
-                geographyConfig: {
-                    highlightOnHover: false,
-                    popupTemplate: function(geo, data) {
-                        return ['<div class="hoverinfo"><strong>',
-                                geo.properties.name + ': ' + data.CLI,
-                                '</strong></div>'].join('');
-                    }
-                },
-                done: function(datamap) {
-                    datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-                        var update = {};
-                        var state = geography.id;
-                        if(state !== selectedStates.curr && selectedStates.clicked === state) {
-                            update[geography.id] = {fillKey: "defaultFill"};
-                            selectedStates.clicked = "";
-                            map.updateChoropleth(update);
-                            $("#compared-state").text("");
-                            $("#delta-state").text("");
-                        } else if(state !== selectedStates.curr) {
-                            update[state] = {fillKey: "Clicked"};
-                            update[selectedStates.clicked] = {fillKey: "defaultFill"};
-                            map.updateChoropleth(update);
-                            selectedStates.clicked = state;
-                            var stateNameList = stateMapData.filter(function(arr_val) {
-                                return arr_val.State === state;
-                            });
-                            $("#compared-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
-                            comparedStateCLI = stateNameList[0].Index;
-                            console.log(selectedStateCLI);
-                            if(selectedStateCLI) {
-                                var delta = selectedStateCLI - stateNameList[0].Index;
-                                $("#delta-state").text(delta.toFixed(2));
-                            }
-                        }
-                    });
+    function loadCLIData(data) {
+        var mapData = {};
+        for(var i = 0; i < data.length; i++) {
+            mapData[data[i].State] = {
+                CLI: data[i].Index
+            };
+        }
+        myMap = new Datamap({
+            element: document.getElementById('costMap'),
+            scope: 'usa',
+            fills: {
+                Selected: "rgba(75, 144, 64, 1)",
+                Clicked: "rgba(247,149,52, 1)",
+                defaultFill: 'rgba(150, 150, 150, 0.72)'
+            },
+            data: mapData,
+            geographyConfig: {
+                highlightOnHover: false,
+                popupTemplate: function(geo, data) {
+                    return ['<div class="hoverinfo"><strong>',
+                            geo.properties.name + ': ' + data.CLI,
+                            '</strong></div>'].join('');
                 }
-            });
-        } else {
-            console.log("Cost of Living Data Loading Error");
-        }
-    });
-
-    d3.csv("data/federal_tax.csv", function(data) {
-        if(data) {
-            federalTaxData = data;
-        } else {
-            console.log("Federal Tax Data Loading Error");
-        }
-    });
-
-    d3.csv("data/state_tax.csv", function(data) {
-        if(data) {
-            stateTaxData = data;
-        } else {
-            console.log("State Tax Data Loading Error");
-        }
-    });
+            },
+            done: function(datamap) {
+                datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                    var update = {};
+                    var state = geography.id;
+                    if(state !== selectedStates.curr && selectedStates.clicked === state) {
+                        update[geography.id] = {fillKey: "defaultFill"};
+                        selectedStates.clicked = "";
+                        myMap.updateChoropleth(update);
+                        $("#compared-state").text("");
+                        $("#delta-state").text("");
+                    } else if(state !== selectedStates.curr) {
+                        update[state] = {fillKey: "Clicked"};
+                        update[selectedStates.clicked] = {fillKey: "defaultFill"};
+                        myMap.updateChoropleth(update);
+                        selectedStates.clicked = state;
+                        var stateNameList = stateMapCLIData.filter(function(arr_val) {
+                            return arr_val.State === state;
+                        });
+                        $("#compared-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
+                        comparedStateCLI = stateNameList[0].Index;
+                        console.log(selectedStateCLI);
+                        if(selectedStateCLI) {
+                            var delta = selectedStateCLI - stateNameList[0].Index;
+                            $("#delta-state").text(delta.toFixed(2));
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     // MARK: Dynamic Data Updating
 
@@ -313,9 +337,9 @@
         }
         update[value] = {fillKey: "Selected"};
         selectedStates.curr = value;
-        map.updateChoropleth(update);
-        if(stateMapData) {
-            var stateVal = stateMapData.filter(function(arr_val) {
+        myMap.updateChoropleth(update);
+        if(stateMapCLIData) {
+            var stateVal = stateMapCLIData.filter(function(arr_val) {
                 return value === arr_val.State;
             });
             $('#cli-index').text(stateVal[0].Index);
@@ -337,7 +361,7 @@
     }
 
     function setStateTax(value) {
-        var stateNameList = stateMapData.filter(function(arr_val) {
+        var stateNameList = stateMapCLIData.filter(function(arr_val) {
             return arr_val.State === value;
         });
         $("#selected-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
