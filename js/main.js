@@ -105,7 +105,7 @@
         var myChart = new Chart(companyChart, {
                     type: 'bar',
                     data: {
-                        labels: [data[0].Name, data[1].Name, data[2].Name],
+                        labels: ["Company 1", "Company 2", "Company 3"],
                         datasets: [
                             {
                                 type: 'line',
