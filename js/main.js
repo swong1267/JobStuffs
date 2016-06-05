@@ -13,12 +13,13 @@
     var myBarChart;
     var myMap;
 
-    var federalTax;
-    var salary;
-    var selectedState;
-    var selectedStateCLI;
-    var comparedState;
-    var comparedStateCLI;
+    // Current User Information
+    var myInfo = {};
+    myInfo.jobTypeObj = null;
+    myInfo.salary = null;
+    myInfo.federalTax = null;
+    myInfo.stateTax = null;
+    myInfo.selectedState = null;
 
     var selectedStates = {};
     selectedStates.curr = "";
@@ -171,6 +172,11 @@
             type: 'line',
             data: chartData,
             options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Average Salary from 2011-2015'
+                },
                 scales: {
                     yAxes: [{
                         display: true,
@@ -244,23 +250,11 @@
                         update[geography.id] = {fillKey: "defaultFill"};
                         selectedStates.clicked = "";
                         myMap.updateChoropleth(update);
-                        $("#compared-state").text("");
-                        $("#delta-state").text("");
                     } else if(state !== selectedStates.curr) {
                         update[state] = {fillKey: "Clicked"};
                         update[selectedStates.clicked] = {fillKey: "defaultFill"};
                         myMap.updateChoropleth(update);
                         selectedStates.clicked = state;
-                        var stateNameList = stateMapCLIData.filter(function(arr_val) {
-                            return arr_val.State === state;
-                        });
-                        $("#compared-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
-                        comparedStateCLI = stateNameList[0].Index;
-                        console.log(selectedStateCLI);
-                        if(selectedStateCLI) {
-                            var delta = selectedStateCLI - stateNameList[0].Index;
-                            $("#delta-state").text(delta.toFixed(2));
-                        }
                     }
                 });
             }
@@ -271,11 +265,17 @@
 
     // Update charts according to jobType
     function updateJobType(value) {
+        updateSalaryChartByJob(value);
+        updateBarChartByJob(value);
+        updateInfoSectionByJob(value);
+    }
+
+    function updateSalaryChartByJob(value) {
         //Update Salary Chart
         var newJobType = salaryChartData.filter(function(arr_value) {
             return arr_value.Job === value;
         })[0];
-        //Get Industry Companies
+        myInfo.newJobType = newJobType;
         var comparableJobs = salaryChartData.filter(function(arr_val) {
             return arr_val.Industry === newJobType.Industry;
         });
@@ -285,18 +285,20 @@
             jobTwo = comparableJobs[Math.floor(Math.random()*comparableJobs.length)];
         }
         var currData = myLineSalaryChart.config.data.datasets;
-        currData[0].label = jobOne.Job;
-        currData[0].data = [jobOne["2011"], jobOne["2012"], jobOne["2013"], jobOne["2014"], jobOne["2015"]];
+        currData[0].label = newJobType.Job;
+        currData[0].data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
+        currData[1].label = jobOne.Job;
+        currData[1].data = [jobOne["2011"], jobOne["2012"], jobOne["2013"], jobOne["2014"], jobOne["2015"]];
         currData[2].label = jobTwo.Job;
         currData[2].data = [jobTwo["2011"], jobTwo["2012"], jobTwo["2013"], jobTwo["2014"], jobTwo["2015"]];
-        currData[1].label = newJobType.Job;
-        currData[1].data = [newJobType["2011"], newJobType["2012"], newJobType["2013"], newJobType["2014"], newJobType["2015"]];
         myLineSalaryChart.update();
+    }
 
+    function updateBarChartByJob(value) {
         //Update Bar Chart
         var barData = myBarChart.config.data.datasets;
         var newIndustryArr = companyChartData.filter(function(arr_value) {
-            return arr_value.Industry === newJobType.Industry;
+            return arr_value.Industry === myInfo.newJobType.Industry;
         });
         var companyOne = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
         var companyTwo, companyThree;
@@ -309,41 +311,43 @@
         myBarChart.config.data.labels[0] = companyOne.Name;
         myBarChart.config.data.labels[1] = companyTwo.Name;
         myBarChart.config.data.labels[2] = companyThree.Name;
-        barData[0].data[0] = barData[0].data[1] = barData[0].data[2] = newJobType["2015"];
+        barData[0].data[0] = barData[0].data[1] = barData[0].data[2] = myInfo.newJobType["2015"];
         barData[1].data[0] = companyOne.Pay;
         barData[1].data[1] = companyTwo.Pay;
         barData[1].data[2] = companyThree.Pay;
         myBarChart.update();
+    }
 
+    function updateInfoSectionByJob(value) {
         //Update info section
-        salary = parseInt(newJobType["2015"]);
-        $('#my-job').text(newJobType.Job);
-        $('#job-salary').text("$ " + addCommas(salary.toFixed(2)));
+        myInfo.salary = parseInt(myInfo.newJobType["2015"]);
+        $('#my-job').text(myInfo.newJobType.Job);
+        $('#job-salary').text("$ " + addCommas(myInfo.salary.toFixed(2)));
         var rate = 0;
-        if(!salary) {salary = 0;}
+        if(!myInfo.salary) {myInfo.salary = 0;}
         for(var i = 0; i < federalTaxData.length; i++) {
             if(federalTaxData[i].Max == -1) {
-                if(salary >= federalTaxData[i].Min) {
+                if(myInfo.salary >= federalTaxData[i].Min) {
                     rate = federalTaxData[i].Rate;
                     break;
                 }
             } else {
-                if(salary >= federalTaxData[i].Min && salary <= federalTaxData[i].Max) {
+                if(myInfo.salary >= federalTaxData[i].Min && myInfo.salary <= federalTaxData[i].Max) {
                     rate = federalTaxData[i].Rate;
                     break;
                 }
             }
         }
-        federalTax = rate*salary;
-        federalTax = addCommas(federalTax.toFixed(2));
-        $('#federal-tax').text("$ " + federalTax);
-        if(selectedState) {
+        myInfo.federalTax = rate*myInfo.salary;
+        myInfo.federalTax = addCommas(myInfo.federalTax.toFixed(2));
+        $('#federal-tax').text("$ " + myInfo.federalTax);
+        if(myInfo.selectedState) {
             setStateTax(selectedState);
         }
     }
 
     function updateState(value) {
-        selectedState = value;
+        myInfo.selectedState = value;
         var update = {};
         var lastState = selectedStates.curr;
         if(lastState) {
@@ -352,12 +356,12 @@
         update[value] = {fillKey: "Selected"};
         selectedStates.curr = value;
         myMap.updateChoropleth(update);
-        if(stateMapCLIData) {
+        /*if(stateMapCLIData) {
             var stateVal = stateMapCLIData.filter(function(arr_val) {
                 return value === arr_val.State;
             });
             $('#cli-index').text(stateVal[0].Index);
-        }
+        }*/
         setStateTax(value);
     }
 
@@ -365,40 +369,31 @@
         var stateNameList = stateMapCLIData.filter(function(arr_val) {
             return arr_val.State === value;
         });
-        $("#selected-state").text(stateNameList[0].State_Name + " " + stateNameList[0].Index);
-        selectedStateCLI = stateNameList[0].Index;
-        if(comparedStateCLI) {
-            var delta = stateNameList[0].Index-comparedStateCLI;
-            $("#delta-state").text(delta.toFixed(2));
-        } else {
-            $("#delta-state").text("");
-        }
         //Get State Tax
-        if(salary) {
+        if(myInfo.salary) {
             var stateTaxList = stateTaxData.filter(function(arr_val) {
                 return arr_val.State === value;
             });
-            var stateTax;
             if(stateTaxList[0].Fed_Ind === 1) {
-                if(federalTax) {
-                    stateTax = stateTaxList[0].Rate * federalTax;
-                    $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
+                if(myInfo.federalTax) {
+                    myInfo.stateTax = stateTaxList[0].Rate * myInfo.federalTax;
+                    $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
                 }
             } else {
                 var state_rate;
                 for(var i = 0; i < stateTaxList.length; i++) {
                     if(stateTaxList[i].Max == -1) {
-                        if(salary >= stateTaxList[i].Min) {
+                        if(myInfo.salary >= stateTaxList[i].Min) {
                             state_rate = stateTaxList[i].Rate;
-                            stateTax = state_rate * salary;
-                            $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
+                            myInfo.stateTax = state_rate * myInfo.salary;
+                            $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
                             break;
                         }
                     } else {
-                        if(salary >= stateTaxList[i].Min && salary <= stateTaxList[i].Max) {
+                        if(myInfo.salary >= stateTaxList[i].Min && myInfo.salary <= stateTaxList[i].Max) {
                             state_rate = stateTaxList[i].Rate;
-                            stateTax = state_rate * salary;
-                            $("#state-tax").text("$ " + addCommas(stateTax.toFixed(2)));
+                            myInfo.stateTax = state_rate * myInfo.salary;
+                            $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
                             break;
                         }
                     }
