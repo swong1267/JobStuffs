@@ -30,8 +30,12 @@
     colorScheme.primaryColor = 'rgb(75, 144, 64)';
     colorScheme.companyChartSecondaryBackgroundColor = 'rgba(247,149,52, 0.2)';
     colorScheme.companyChartSecondaryColor = 'rgba(247,149,52,1)';
-    colorScheme.salaryHistorySecondaryBackgroundColor = '';
-    colorScheme.salaryHistorySecondaryColor = '';
+    colorScheme.salaryHistorySecondaryBackgroundColor = 'rgba(106, 121, 221, 0.3)';
+    colorScheme.salaryHistorySecondaryColor = 'rgb(72, 85, 208)';
+    colorScheme.salaryHistoryThirdBackgroundColor = 'rgba(205, 69, 69, 0.3)';
+    colorScheme.salaryHistoryThirdColor = 'rgb(209, 81, 81)';
+    colorScheme.mapClicked = 'rgb(125, 91, 238)';
+    colorScheme.mapDefaultFill = 'rgb(200, 200, 200)';
 
     // MARK: Load and Initialize all Data
 
@@ -90,25 +94,34 @@
         var myChart = new Chart(companyChart, {
                     type: 'bar',
                     data: {
-                        labels: ["My Salary", data[1].Name, data[2].Name],
+                        labels: [data[0].Name, data[1].Name, data[2].Name],
                         datasets: [
                             {
-                                label: 'My Salary',
+                                type: 'line',
+                                label: 'My Average 2015 Salary',
                                 data: [0,0,0],
+                                fill: false,
                                 backgroundColor: colorScheme.primaryBackgroundColor,
                                 borderColor: colorScheme.primaryColor,
-                                borderWidth: 2
+                                borderWidth: 1,
+                                borderDash: [5,15]
                             },
                             {
+                                type: 'bar',
                                 label: 'Top Companies in Industry',
                                 data: [0,0,0],
-                                backgroundColor: colorScheme.companyChartSecondaryBackgroundColor, //Orange
+                                backgroundColor: colorScheme.companyChartSecondaryBackgroundColor,
                                 borderColor: colorScheme.companyChartSecondaryColor,
                                 borderWidth: 2
                             }
                         ]
                     },
                     options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Median Salary Comparison with Fortune 500 Companies in Job Industry'
+                        },
                         scales: {
                             yAxes: [{
                                 display: true,
@@ -138,16 +151,16 @@
                 },
                 {
                     label: "Comparable Job",
-                    backgroundColor: 'rgba(247,149,52, 0.37)',
-                    borderColor: "rgba(247,149,52, 0.9)",
+                    backgroundColor: colorScheme.salaryHistorySecondaryBackgroundColor,
+                    borderColor: colorScheme.salaryHistorySecondaryColor,
                     borderWidth: 2,
                     fill: false,
                     data: []
                 },
                 {
                     label: "Comparable Job",
-                    backgroundColor: 'rgba(247,149,52, 0.37)',
-                    borderColor: "rgba(247,149,52, 0.9)",
+                    backgroundColor: colorScheme.salaryHistoryThirdBackgroundColor,
+                    borderColor: colorScheme.salaryHistoryThirdColor,
                     borderWidth: 2,
                     fill: false,
                     data: []
@@ -198,6 +211,7 @@
         });
     }
 
+    // Load Cost of Living Data
     function loadCLIData(data) {
         var mapData = {};
         for(var i = 0; i < data.length; i++) {
@@ -209,9 +223,9 @@
             element: document.getElementById('costMap'),
             scope: 'usa',
             fills: {
-                Selected: "rgba(75, 144, 64, 1)",
-                Clicked: "rgba(247,149,52, 1)",
-                defaultFill: 'rgba(150, 150, 150, 0.72)'
+                Selected: colorScheme.primaryColor,
+                Clicked: colorScheme.mapClicked,
+                defaultFill: colorScheme.mapDefaultFill
             },
             data: mapData,
             geographyConfig: {
@@ -347,19 +361,6 @@
         setStateTax(value);
     }
 
-    function addCommas(nStr)
-    {
-        nStr += '';
-        x = nStr.split('.');
-        x1 = x[0];
-        x2 = x.length > 1 ? '.' + x[1] : '';
-        var rgx = /(\d+)(\d{3})/;
-        while (rgx.test(x1)) {
-            x1 = x1.replace(rgx, '$1' + ',' + '$2');
-        }
-        return x1 + x2;
-    }
-
     function setStateTax(value) {
         var stateNameList = stateMapCLIData.filter(function(arr_val) {
             return arr_val.State === value;
@@ -404,6 +405,20 @@
                 }
             }
         }
+    }
+
+    // MARK: Utility Functions
+    function addCommas(nStr)
+    {
+        nStr += '';
+        x = nStr.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return x1 + x2;
     }
 
 })();
