@@ -12,6 +12,8 @@
     var myLineSalaryChart;
     var myBarChart;
     var myMap;
+    var myDifferentialChart;
+    var myCLIBarChart;
 
     // Calculated Values
     var rankedSalaryDifferential = [];
@@ -41,6 +43,10 @@
     colorScheme.mapClicked = 'rgb(125, 91, 238)';
     colorScheme.mapDefaultFill = 'rgb(200, 200, 200)';
     colorScheme.mapGradient = ['rgb(128, 230, 120)','rgb(174, 235, 193)','rgb(226, 226, 226)', 'rgb(224, 154, 154)', 'rgb(227, 92, 92)'];
+    colorScheme.differentialBarOneBackground = 'rgba(88, 215, 223, 0.3)';
+    colorScheme.differentialBarOne = 'rgb(88,215,223)';
+    colorScheme.differentialBarTwoBackground = 'rgba(231, 233, 121, 0.3)';
+    colorScheme.differentialBarTwo = 'rgb(231,233,121)';
 
     // MARK: Load and Initialize all Data
 
@@ -241,10 +247,74 @@
                 highlightOnHover: false,
                 popupTemplate: function(geo, data) {
                     return ['<div class="hoverinfo"><strong>',
-                            geo.properties.name + ': ' +// data.PayDifferential,
+                            geo.properties.name +
                             '</strong></div>'].join('');
                 }
             },
+        });
+        myDifferentialChart = new Chart(salaryDifferentialChart, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Selected State", "Comparison State"],
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Salary minus Taxes',
+                                data: [0,0],
+                                backgroundColor: colorScheme.differentialBarOneBackground,
+                                borderColor: colorScheme.differentialBarOne,
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Comparing Post Tax Salary per State'
+                        },
+                        scales: {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100000
+                                }
+                            }]
+                        },
+                    }
+        });
+        myCLIBarChart = new Chart(cliBarChart, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Selected State", "Comparison State"],
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Cost of Living Index',
+                                data: [0,0],
+                                backgroundColor: colorScheme.differentialBarTwoBackground,
+                                borderColor: colorScheme.differentialBarTwo,
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Comparing Cost of Living per State'
+                        },
+                        scales: {
+                            yAxes: [{
+                                display: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 175
+                                }
+                            }]
+                        },
+                    }
         });
     }
 
@@ -259,7 +329,7 @@
     }
 
     function updateMapSalaryDifferential() {
-        $("#costMap").parent().append( '<div id="costMap" style="position: relative; width: 60%; height: 400px;"></div>');
+        $("#costMap").parent().append('<div id="costMap" style="width: 100%; height: 400px;"></div>');
         $("#costMap").remove();
         var fedTax = getFederalTax();
         var quantileArr = [];
@@ -307,14 +377,32 @@
             },
             data: datamap,
             geographyConfig: {
-                highlightOnHover: false,
+                highlightOnHover: true,
+                highlightFillColor: 'rgb(244, 244, 244)',
+                highlightBorderColor: 'rgb(78, 78, 78)',
                 popupTemplate: function(geo, data) {
                     return ['<div class="hoverinfo"><strong>',
                             geo.properties.name + ': $ ' + addCommas(data.PayDifferential.toFixed(2)),
                             '</strong></div>'].join('');
                 }
             },
+            done: function(datamap) {
+                datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                    var update = {};
+                    var state = geography.id;
+                    if(state !== selectedStates.curr && selectedStates.clicked === state) {
+                        selectedStates.clicked = "";
+                    } else if(state !== selectedStates.curr) {
+                        selectedStates.clicked = state;
+                    }
+                });
+            }
         });
+        var state_differential = rankedSalaryDifferential.filter(function(arr_value) {
+            return arr_value.State === selectedStates.curr;
+        })[0];
+        myDifferentialChart.config.data.datasets[0].data[0] = state_differential.Scaled_Pay;
+        myDifferentialChart.update();
     }
 
     function updateSalaryChartByJob(value) {
@@ -355,6 +443,7 @@
         while(!companyThree || (companyThree === companyOne) || (companyThree === companyTwo)) {
             companyThree = newIndustryArr[Math.floor(Math.random()*newIndustryArr.length)];
         }
+        myBarChart.config.data.datasets[0].label = myInfo.newJobType.Job + " Average Salary (2015)";
         myBarChart.config.data.labels[0] = companyOne.Name;
         myBarChart.config.data.labels[1] = companyTwo.Name;
         myBarChart.config.data.labels[2] = companyThree.Name;
@@ -376,6 +465,8 @@
         if(selectedStates.curr) {
             setStateTax(selectedStates.curr);
         }
+        //Misc Label Updating
+        $('#mapJobTypeVal').text(myInfo.newJobType.Job);
     }
 
     function getFederalTax() {
@@ -399,18 +490,22 @@
 
     function updateState(value) {
         selectedStates.curr = value;
-        var update = {};
-        var lastState = selectedStates.curr;
-        if(lastState) {
-            update[lastState] = {fillKey: "defaultFill"};
-        }
-        update[value] = {fillKey: "Selected"};
-        selectedStates.curr = value;
-        console.log(update);
-        myMap.updateChoropleth(update);
+        var state_cli = stateMapCLIData.filter(function(arr_val) {
+            return arr_val.State === value;
+        })[0];
+        myDifferentialChart.config.data.labels[0] = state_cli.State_Name;
+        myCLIBarChart.config.data.labels[0] = state_cli.State_Name;
+        myCLIBarChart.config.data.datasets[0].data[0] = state_cli.Index;
         if(myInfo.salary) {
             setStateTax(value);
+            var state_differential = rankedSalaryDifferential.filter(function(arr_value) {
+                return arr_value.State === value;
+            })[0];
+            myDifferentialChart.config.data.datasets[0].data[0] = state_differential.Scaled_Pay;
+            myDifferentialChart.update();
         }
+        myDifferentialChart.update();
+        myCLIBarChart.update();
     }
 
     function setStateTax(value) {
@@ -421,7 +516,7 @@
         if(!myInfo.stateTax) {
             myInfo.stateTax = 0;
         }
-        $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
+        $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)) + " ("+ value +")");
     }
 
     function getStateTax(state) {
