@@ -13,6 +13,9 @@
     var myBarChart;
     var myMap;
 
+    // Calculated Values
+    var rankedSalaryDifferential = [];
+
     // Current User Information
     var myInfo = {};
     myInfo.jobTypeObj = null;
@@ -22,8 +25,8 @@
     myInfo.selectedState = null;
 
     var selectedStates = {};
-    selectedStates.curr = "";
-    selectedStates.clicked = "";
+    selectedStates.curr = null;
+    selectedStates.clicked = null;
 
     // Colors
     var colorScheme = {};
@@ -37,6 +40,7 @@
     colorScheme.salaryHistoryThirdColor = 'rgb(209, 81, 81)';
     colorScheme.mapClicked = 'rgb(125, 91, 238)';
     colorScheme.mapDefaultFill = 'rgb(200, 200, 200)';
+    colorScheme.mapGradient = ['rgb(128, 230, 120)','rgb(174, 235, 193)','rgb(226, 226, 226)', 'rgb(224, 154, 154)', 'rgb(227, 92, 92)'];
 
     // MARK: Load and Initialize all Data
 
@@ -82,7 +86,7 @@
     d3.csv("data/cgi_states.csv", function(data) {
         if(data) {
             stateMapCLIData = data;
-            loadCLIData(data);
+            setUpMap();
         } else {
             console.log("Cost of Living Data Loading Error");
         }
@@ -217,47 +221,30 @@
         });
     }
 
-    // Load Cost of Living Data
-    function loadCLIData(data) {
-        var mapData = {};
-        for(var i = 0; i < data.length; i++) {
-            mapData[data[i].State] = {
-                CLI: data[i].Index
-            };
-        }
+    // Initial Empty Map
+    function setUpMap() {
         myMap = new Datamap({
             element: document.getElementById('costMap'),
             scope: 'usa',
             fills: {
                 Selected: colorScheme.primaryColor,
                 Clicked: colorScheme.mapClicked,
+                GradientOne: colorScheme.mapGradient[0],
+                GradientTwo: colorScheme.mapGradient[1],
+                GradientThree: colorScheme.mapGradient[2],
+                GradientFour: colorScheme.mapGradient[3],
+                GradientFive: colorScheme.mapGradient[4],
                 defaultFill: colorScheme.mapDefaultFill
             },
-            data: mapData,
+            data: {},
             geographyConfig: {
                 highlightOnHover: false,
                 popupTemplate: function(geo, data) {
                     return ['<div class="hoverinfo"><strong>',
-                            geo.properties.name + ': ' + data.CLI,
+                            geo.properties.name + ': ' +// data.PayDifferential,
                             '</strong></div>'].join('');
                 }
             },
-            done: function(datamap) {
-                datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-                    var update = {};
-                    var state = geography.id;
-                    if(state !== selectedStates.curr && selectedStates.clicked === state) {
-                        update[geography.id] = {fillKey: "defaultFill"};
-                        selectedStates.clicked = "";
-                        myMap.updateChoropleth(update);
-                    } else if(state !== selectedStates.curr) {
-                        update[state] = {fillKey: "Clicked"};
-                        update[selectedStates.clicked] = {fillKey: "defaultFill"};
-                        myMap.updateChoropleth(update);
-                        selectedStates.clicked = state;
-                    }
-                });
-            }
         });
     }
 
@@ -268,6 +255,66 @@
         updateSalaryChartByJob(value);
         updateBarChartByJob(value);
         updateInfoSectionByJob(value);
+        updateMapSalaryDifferential();
+    }
+
+    function updateMapSalaryDifferential() {
+        $("#costMap").parent().append( '<div id="costMap" style="position: relative; width: 60%; height: 400px;"></div>');
+        $("#costMap").remove();
+        var fedTax = getFederalTax();
+        var quantileArr = [];
+        rankedSalaryDifferential = [];
+        for(var i = 0; i < stateMapCLIData.length; i++) {
+            var state = stateMapCLIData[i].State;
+            var state_name = stateMapCLIData[i].State_Name;
+            var stateobj = {};
+            stateobj.State = state;
+            stateobj.State_Name = state_name;
+            stateobj.Scaled_Pay = myInfo.salary - fedTax - getStateTax(state);
+            quantileArr.push(stateobj.Scaled_Pay);
+            rankedSalaryDifferential.push(stateobj);
+        }
+        var quintileScaledPay = jStat.quantiles(quantileArr,[0.2, 0.4, 0.6, 0.8]);
+        var datamap = {};
+        for(var j = 0; j < rankedSalaryDifferential.length; j++) {
+            var scaled_pay = rankedSalaryDifferential[j].Scaled_Pay;
+            var stateCode = rankedSalaryDifferential[j].State;
+            if(scaled_pay >= quintileScaledPay[3]) {
+                datamap[stateCode] = { fillKey: "GradientOne" };
+            } else if(scaled_pay >= quintileScaledPay[2]) {
+                datamap[stateCode] = { fillKey: "GradientTwo" };
+            } else if(scaled_pay >= quintileScaledPay[1]) {
+                datamap[stateCode] = { fillKey: "GradientThree" };
+            } else if(scaled_pay >= quintileScaledPay[0]) {
+                datamap[stateCode] = { fillKey: "GradientFour" };
+            } else {
+                datamap[stateCode] = { fillKey: "GradientFive" };
+            }
+            datamap[stateCode].PayDifferential = scaled_pay;
+        }
+        myMap = new Datamap({
+            element: document.getElementById('costMap'),
+            scope: 'usa',
+            fills: {
+                Selected: colorScheme.primaryColor,
+                Clicked: colorScheme.mapClicked,
+                GradientOne: colorScheme.mapGradient[0],
+                GradientTwo: colorScheme.mapGradient[1],
+                GradientThree: colorScheme.mapGradient[2],
+                GradientFour: colorScheme.mapGradient[3],
+                GradientFive: colorScheme.mapGradient[4],
+                defaultFill: colorScheme.mapDefaultFill
+            },
+            data: datamap,
+            geographyConfig: {
+                highlightOnHover: false,
+                popupTemplate: function(geo, data) {
+                    return ['<div class="hoverinfo"><strong>',
+                            geo.properties.name + ': $ ' + addCommas(data.PayDifferential.toFixed(2)),
+                            '</strong></div>'].join('');
+                }
+            },
+        });
     }
 
     function updateSalaryChartByJob(value) {
@@ -323,6 +370,15 @@
         myInfo.salary = parseInt(myInfo.newJobType["2015"]);
         $('#my-job').text(myInfo.newJobType.Job);
         $('#job-salary').text("$ " + addCommas(myInfo.salary.toFixed(2)));
+        myInfo.federalTax = getFederalTax();
+        myInfo.federalTax = addCommas(myInfo.federalTax.toFixed(2));
+        $('#federal-tax').text("$ " + myInfo.federalTax);
+        if(selectedStates.curr) {
+            setStateTax(selectedStates.curr);
+        }
+    }
+
+    function getFederalTax() {
         var rate = 0;
         if(!myInfo.salary) {myInfo.salary = 0;}
         for(var i = 0; i < federalTaxData.length; i++) {
@@ -338,16 +394,11 @@
                 }
             }
         }
-        myInfo.federalTax = rate*myInfo.salary;
-        myInfo.federalTax = addCommas(myInfo.federalTax.toFixed(2));
-        $('#federal-tax').text("$ " + myInfo.federalTax);
-        if(myInfo.selectedState) {
-            setStateTax(selectedState);
-        }
+        return rate*myInfo.salary;
     }
 
     function updateState(value) {
-        myInfo.selectedState = value;
+        selectedStates.curr = value;
         var update = {};
         var lastState = selectedStates.curr;
         if(lastState) {
@@ -355,29 +406,33 @@
         }
         update[value] = {fillKey: "Selected"};
         selectedStates.curr = value;
+        console.log(update);
         myMap.updateChoropleth(update);
-        /*if(stateMapCLIData) {
-            var stateVal = stateMapCLIData.filter(function(arr_val) {
-                return value === arr_val.State;
-            });
-            $('#cli-index').text(stateVal[0].Index);
-        }*/
-        setStateTax(value);
+        if(myInfo.salary) {
+            setStateTax(value);
+        }
     }
 
     function setStateTax(value) {
         var stateNameList = stateMapCLIData.filter(function(arr_val) {
             return arr_val.State === value;
         });
+        myInfo.stateTax = getStateTax(value);
+        if(!myInfo.stateTax) {
+            myInfo.stateTax = 0;
+        }
+        $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
+    }
+
+    function getStateTax(state) {
         //Get State Tax
         if(myInfo.salary) {
             var stateTaxList = stateTaxData.filter(function(arr_val) {
-                return arr_val.State === value;
+                return arr_val.State === state;
             });
             if(stateTaxList[0].Fed_Ind === 1) {
                 if(myInfo.federalTax) {
-                    myInfo.stateTax = stateTaxList[0].Rate * myInfo.federalTax;
-                    $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
+                    return stateTaxList[0].Rate * myInfo.federalTax;
                 }
             } else {
                 var state_rate;
@@ -385,16 +440,12 @@
                     if(stateTaxList[i].Max == -1) {
                         if(myInfo.salary >= stateTaxList[i].Min) {
                             state_rate = stateTaxList[i].Rate;
-                            myInfo.stateTax = state_rate * myInfo.salary;
-                            $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
-                            break;
+                            return state_rate * myInfo.salary;
                         }
                     } else {
                         if(myInfo.salary >= stateTaxList[i].Min && myInfo.salary <= stateTaxList[i].Max) {
                             state_rate = stateTaxList[i].Rate;
-                            myInfo.stateTax = state_rate * myInfo.salary;
-                            $("#state-tax").text("$ " + addCommas(myInfo.stateTax.toFixed(2)));
-                            break;
+                            return state_rate * myInfo.salary;
                         }
                     }
                 }
