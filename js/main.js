@@ -261,8 +261,8 @@
                                 type: 'bar',
                                 label: 'Salary minus Taxes',
                                 data: [0,0],
-                                backgroundColor: colorScheme.differentialBarOneBackground,
-                                borderColor: colorScheme.differentialBarOne,
+                                backgroundColor: [colorScheme.differentialBarOneBackground,colorScheme.differentialBarTwoBackground],
+                                borderColor: [colorScheme.differentialBarOne,colorScheme.differentialBarTwo],
                                 borderWidth: 1
                             }
                         ]
@@ -277,8 +277,8 @@
                             yAxes: [{
                                 display: true,
                                 ticks: {
-                                    beginAtZero: true,
-                                    suggestedMax: 100000
+                                    suggestedMin: 20000,
+                                    suggestedMax: 60000
                                 }
                             }]
                         },
@@ -293,8 +293,8 @@
                                 type: 'bar',
                                 label: 'Cost of Living Index',
                                 data: [0,0],
-                                backgroundColor: colorScheme.differentialBarTwoBackground,
-                                borderColor: colorScheme.differentialBarTwo,
+                                backgroundColor: [colorScheme.differentialBarOneBackground,colorScheme.differentialBarTwoBackground],
+                                borderColor: [colorScheme.differentialBarOne,colorScheme.differentialBarTwo],
                                 borderWidth: 1
                             }
                         ]
@@ -303,14 +303,14 @@
                         responsive: true,
                         title: {
                             display: true,
-                            text: 'Comparing Cost of Living per State'
+                            text: 'Comparing Cost of Living per State (Indexed to 100)'
                         },
                         scales: {
                             yAxes: [{
                                 display: true,
                                 ticks: {
-                                    beginAtZero: true,
-                                    suggestedMax: 175
+                                    suggestedMin: 50,
+                                    suggestedMax: 150
                                 }
                             }]
                         },
@@ -388,12 +388,22 @@
             },
             done: function(datamap) {
                 datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-                    var update = {};
                     var state = geography.id;
-                    if(state !== selectedStates.curr && selectedStates.clicked === state) {
-                        selectedStates.clicked = "";
-                    } else if(state !== selectedStates.curr) {
-                        selectedStates.clicked = state;
+                    if(state !== selectedStates.curr) {
+                        var state_cli = stateMapCLIData.filter(function(arr_val) {
+                            return arr_val.State === state;
+                        })[0];
+                        myDifferentialChart.config.data.labels[1] = state_cli.State_Name;
+                        myCLIBarChart.config.data.labels[1] = state_cli.State_Name;
+                        myCLIBarChart.config.data.datasets[0].data[1] = state_cli.Index;
+                        if(myInfo.salary) {
+                            var state_differential = rankedSalaryDifferential.filter(function(arr_value) {
+                                return arr_value.State === state;
+                            })[0];
+                            myDifferentialChart.config.data.datasets[0].data[1] = state_differential.Scaled_Pay;
+                        }
+                        myDifferentialChart.update();
+                        myCLIBarChart.update();
                     }
                 });
             }
@@ -401,8 +411,11 @@
         var state_differential = rankedSalaryDifferential.filter(function(arr_value) {
             return arr_value.State === selectedStates.curr;
         })[0];
-        myDifferentialChart.config.data.datasets[0].data[0] = state_differential.Scaled_Pay;
-        myDifferentialChart.update();
+        console.log(state_differential);
+        if(state_differential) {
+            myDifferentialChart.config.data.datasets[0].data[0] = state_differential.Scaled_Pay;
+            myDifferentialChart.update();
+        }
     }
 
     function updateSalaryChartByJob(value) {
@@ -502,7 +515,6 @@
                 return arr_value.State === value;
             })[0];
             myDifferentialChart.config.data.datasets[0].data[0] = state_differential.Scaled_Pay;
-            myDifferentialChart.update();
         }
         myDifferentialChart.update();
         myCLIBarChart.update();
