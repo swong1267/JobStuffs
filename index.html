@@ -129,21 +129,27 @@
     <div class="row row-bottom">
       <div class="col-md-9 col-left col">
         <div class="well" id="map">
-          <h3 class="header">Cost of Living Index</h3>
-          <div id="costMap" style="position: relative; width: 60%; height: 300px;"></div>
-          <div id="map-comparison"> 
+          <h3 class="header">Salary After Federal and State Tax</h3>
+          <h5>Using Average <span id="mapJobTypeVal">Job Type</span> Salary (2015)</h5>
+          <div class="row">
+              <div class="col-sm-8 col-m-8" style="width: 60%;">
+                  <div id="costMap" style="width: 100%; height: 400px;"></div>
+              </div>
+              <div class="col-sm-4 col-m-4" style="width: 40%; height: 100%;">
+                  <canvas id="salaryDifferentialChart" style="position: relative;"></canvas>
+                  <canvas id="cliBarChart" style="position: relative;"></canvas>
+              </div>
           </div>
         </div>
       </div>
       <div class="col-md-3 col-right col">
-        <div class="well" id="figures">
+        <div class="well" id="figures" style="height: 505px;">
           <h3 class="header"> My Job </h3>
           <div class="panel panel-default" style="width: 90%;" id="figure-panel">
            <ul class="list-group">
               <li class="list-group-item"><b>Salary: </b><span id="job-salary" style="float:right;"></span></li>
               <li class="list-group-item"><b>Federal Tax: </b><span id="federal-tax" style="float:right;"></span></li>
-<!--               <li class="list-group-item"><b>State Tax: </b><span id="state-tax" style="float:right;"></span></li>
-              <li class="list-group-item"><b>Cost of Living Index: </b><span id="cli-index" style="float:right;"></span></li> -->
+               <li class="list-group-item"><b>State Tax: </b><span id="state-tax" style="float:right;"></span></li>
             </ul>
           </div>
         </div>
@@ -166,6 +172,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js"></script>
     <script src="js/datamaps.usa.min.js"></script>
     <script src="js/selectize.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/jstat/1.5.2/jstat.min.js"></script>
 
     <!-- Chartjs-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js" charset="utf-8"></script>
