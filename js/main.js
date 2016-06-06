@@ -252,7 +252,7 @@
                 }
             },
         });
-        Chart.defaults.global.legend.display = false;
+
         myDifferentialChart = new Chart(salaryDifferentialChart, {
 
                     type: 'bar',
@@ -265,11 +265,14 @@
                                 data: [0,0],
                                 backgroundColor: [colorScheme.differentialBarOneBackground,colorScheme.differentialBarTwoBackground],
                                 borderColor: [colorScheme.differentialBarOne,colorScheme.differentialBarTwo],
-                                borderWidth: 1
+                                borderWidth: 2
                             }
                         ]
                     },
                     options: {
+                        legend: {
+                            display: false
+                        },
                         responsive: true,
                         title: {
                             display: true,
@@ -298,11 +301,14 @@
                                 data: [0,0],
                                 backgroundColor: [colorScheme.differentialBarOneBackground,colorScheme.differentialBarTwoBackground],
                                 borderColor: [colorScheme.differentialBarOne,colorScheme.differentialBarTwo],
-                                borderWidth: 1
+                                borderWidth: 2
                             }
                         ]
                     },
                     options: {
+                        legend: {
+                            display: false
+                        },
                         responsive: true,
                         title: {
                             display: true,
