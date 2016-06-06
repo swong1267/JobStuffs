@@ -10,7 +10,18 @@ body { height:100%; width: 100%; padding: 5px; color: #6D6E72;}
 	float: left;
 	margin-right: 10px;
 	display: inline-block;
-	position: relative
+	position: relative;
+}
+
+#legend {
+	max-width: 70%;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+h5#source-info {
+	color: #6D6E72;
 }
 
 div.well {
@@ -31,6 +42,11 @@ h3.header {
 	margin: 0;
 	padding: 0;
 	color: #6D6E72;
+}
+
+.navbar-bottom#footnotes {
+	background-color: #8AC23C; 
+	color: white;
 }
 
 #nav {
@@ -57,6 +73,11 @@ h1, h2 {
     color: white;
 }
 
+div.info-boxes {
+	color: #6D6E72;
+	font-size: 14px;
+}
+
 #state {
 	float: left;
 	margin-right: 10px;
@@ -74,6 +95,12 @@ div.col-right {
 
 div.row-top {
 	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+div.row-middle {
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 div.row-bottom {
@@ -88,8 +115,7 @@ div.row-bottom {
 .panel#figure-panel {
 	margin: 20px;
 	margin-top: 40px;
-	color: #6D6E72;
-	font-size: 18px;
+	
 }
 
 .panel#map-panel {

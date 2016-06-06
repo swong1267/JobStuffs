@@ -32,21 +32,20 @@
 
     // Colors
     var colorScheme = {};
-    colorScheme.primaryBackgroundColor = 'rgba(75, 144, 64, 0.37)';
-    colorScheme.primaryColor = 'rgb(75, 144, 64)';
-    colorScheme.companyChartSecondaryBackgroundColor = 'rgba(247,149,52, 0.2)';
-    colorScheme.companyChartSecondaryColor = 'rgba(247,149,52,1)';
-    colorScheme.salaryHistorySecondaryBackgroundColor = 'rgba(106, 121, 221, 0.3)';
-    colorScheme.salaryHistorySecondaryColor = 'rgb(72, 85, 208)';
-    colorScheme.salaryHistoryThirdBackgroundColor = 'rgba(205, 69, 69, 0.3)';
-    colorScheme.salaryHistoryThirdColor = 'rgb(209, 81, 81)';
-    colorScheme.mapClicked = 'rgb(125, 91, 238)';
+    colorScheme.primaryBackgroundColor = 'rgba(247,149,52, 0.37)';
+    colorScheme.primaryColor = 'rgb(247,149,52)';
+    colorScheme.companyChartSecondaryBackgroundColor = 'rgba(101, 215, 251, 0.2)';
+    colorScheme.companyChartSecondaryColor = 'rgba(101, 215, 251,1)';
+    colorScheme.salaryHistorySecondaryBackgroundColor = 'rgba(241, 75, 124, 0.3)';
+    colorScheme.salaryHistorySecondaryColor = 'rgb(241, 75, 124)';
+    colorScheme.salaryHistoryThirdBackgroundColor = 'rgba(241, 229, 75, 0.3)';
+    colorScheme.salaryHistoryThirdColor = 'rgb(241, 229, 75)';
     colorScheme.mapDefaultFill = 'rgb(200, 200, 200)';
-    colorScheme.mapGradient = ['rgb(128, 230, 120)','rgb(174, 235, 193)','rgb(226, 226, 226)', 'rgb(224, 154, 154)', 'rgb(227, 92, 92)'];
-    colorScheme.differentialBarOneBackground = 'rgba(88, 215, 223, 0.3)';
-    colorScheme.differentialBarOne = 'rgb(88,215,223)';
-    colorScheme.differentialBarTwoBackground = 'rgba(231, 233, 121, 0.3)';
-    colorScheme.differentialBarTwo = 'rgb(231,233,121)';
+    colorScheme.mapGradient = ['rgb(75, 144, 64)','rgb(139, 192, 70)','rgb(226, 226, 226)', 'rgb(224, 154, 154)', 'rgb(227, 92, 92)'];
+    colorScheme.differentialBarOneBackground = 'rgba(247,149,52, 0.3)';
+    colorScheme.differentialBarOne = 'rgb(247,149,52)';
+    colorScheme.differentialBarTwoBackground = 'rgba(172, 78, 190, 0.3)';
+    colorScheme.differentialBarTwo = 'rgb(172,78,190)';
 
     // MARK: Load and Initialize all Data
 
@@ -252,7 +251,9 @@
                 }
             },
         });
+
         myDifferentialChart = new Chart(salaryDifferentialChart, {
+
                     type: 'bar',
                     data: {
                         labels: ["Selected State", "Comparison State"],
@@ -284,6 +285,7 @@
                         },
                     }
         });
+
         myCLIBarChart = new Chart(cliBarChart, {
                     type: 'bar',
                     data: {
@@ -366,8 +368,6 @@
             element: document.getElementById('costMap'),
             scope: 'usa',
             fills: {
-                Selected: colorScheme.primaryColor,
-                Clicked: colorScheme.mapClicked,
                 GradientOne: colorScheme.mapGradient[0],
                 GradientTwo: colorScheme.mapGradient[1],
                 GradientThree: colorScheme.mapGradient[2],
@@ -378,8 +378,8 @@
             data: datamap,
             geographyConfig: {
                 highlightOnHover: true,
-                highlightFillColor: 'rgb(244, 244, 244)',
-                highlightBorderColor: 'rgb(78, 78, 78)',
+                highlightFillColor: 'rgb(172,78,190)',
+                highlightBorderColor: 'rgb(99, 24, 113)',
                 popupTemplate: function(geo, data) {
                     return ['<div class="hoverinfo"><strong>',
                             geo.properties.name + ': $ ' + addCommas(data.PayDifferential.toFixed(2)),

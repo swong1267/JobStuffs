@@ -111,6 +111,38 @@
   <div id="content">
 
     <div class="row row-top">
+      <div class="col-md-12 col">
+
+        <div class="well" id="info">
+
+          <div class="row">
+
+            <div class="col-md-1"></div>
+
+            <div class="info-boxes col-md-2" id="avg-sal"> 
+              <b> Avg. Salary: </b> <span id="job-salary" style="float:right;"></span>
+            </div>
+
+            <div class="col-md-2"></div>
+
+            <div class="info-boxes col-md-2" id="fed-tax">
+              <b> Federal Tax: </b> <span id="federal-tax" style="float: right;"></span>
+            </div>
+            <div class="col-md-2"></div>
+
+            <div class="info-boxes col-md-2" id="stat-tax">
+              <b>State Tax: </b><span id="state-tax" style="float:right;"></span>
+            </div>
+
+            <div class="col-md-1"></div>
+
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="row row-middle">
       <div class="col-md-6 col-left col">
         <div class="well" id="history">
           <h3 class="header">Salary History</h3>
@@ -127,12 +159,13 @@
     </div>
 
     <div class="row row-bottom">
-      <div class="col-md-9 col-left col">
+      <div class="col-md-12 col">
         <div class="well" id="map">
           <h3 class="header">Salary After Federal and State Tax</h3>
-          <h5>Using Average <span id="mapJobTypeVal">Job Type</span> Salary (2015)</h5>
+          <h5 id="source-info">Using Average <span id="mapJobTypeVal">Job Type</span> Salary (2015)</h5>
           <div class="row">
               <div class="col-sm-8 col-m-8" style="width: 60%;">
+                  <div><img id="legend" src="img/legend.png"></div>
                   <div id="costMap" style="width: 100%; height: 400px;"></div>
               </div>
               <div class="col-sm-4 col-m-4" style="width: 40%; height: 100%;">
@@ -142,24 +175,11 @@
           </div>
         </div>
       </div>
-      <div class="col-md-3 col-right col">
-        <div class="well" id="figures" style="height: 100%;">
-          <h3 class="header"> Info Panel </h3>
-          <div class="panel panel-default" style="width: 90%;" id="figure-panel">
-              <div class="panel-heading text-center">My Job</div>
-               <ul class="list-group">
-                  <li class="list-group-item"><b>Salary: </b><span id="job-salary" style="float:right;"></span></li>
-                  <li class="list-group-item"><b>Federal Tax: </b><span id="federal-tax" style="float:right;"></span></li>
-                   <li class="list-group-item"><b>State Tax: </b><span id="state-tax" style="float:right;"></span></li>
-                </ul>
-          </div>
-        </div>
-      </div>
     </div>
-    <nav class="navbar navbar-default navbar-bottom">
+    <nav class="navbar navbar-default navbar-bottom" id="footnotes">
       <div class="container">
-        <p class="navbar-text navbar-left">Data was collected from: <a href="http://www.bls.gov" style="text-decoration: none;">The U.S. Bureau of Labor Statistics</a> , <a href="http://www.payscale.com" style="text-decoration: none;">PayScale.com</a>, x, y</p>
-        <p class="navbar-text navbar-right">Created By: <a href="https://github.com/haiyinwang" style="text-decoration: none;">Haiyin Wang</a>, Lorena Huang Liu, <a href="https://github.com/swong1267" style="text-decoration: none;">Serena Wong</a></p>
+        <p class="navbar-text navbar-left">Data was collected from: <a href="http://www.bls.gov" style="text-decoration: none;">The U.S. Bureau of Labor Statistics</a> , <a href="http://www.payscale.com" style="text-decoration: none;">PayScale.com</a>, <a href="http://taxfoundation.org/article/state-individual-income-tax-rates-and-brackets-2016" style="text-decoration: none;">TaxFoundation.org</a>, <a href="http://bestplaces.net" style="text-decoration: none;">BestPlaces.net</a></p>
+        <p class="navbar-text navbar-right">Created By: <a href="https://github.com/haiyinwang" style="text-decoration: none;">Haiyin Wang</a>, <a href="https://github.com/lorenahuangliu" style="text-decoration: none;">Lorena Huang Liu</a>, <a href="https://github.com/swong1267" style="text-decoration: none;">Serena Wong</a></p>
       </div>
     </nav>
   </div>
