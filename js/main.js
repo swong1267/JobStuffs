@@ -228,6 +228,7 @@
 
     // Initial Empty Map
     function setUpMap() {
+
         myMap = new Datamap({
             element: document.getElementById('costMap'),
             scope: 'usa',
@@ -251,7 +252,7 @@
                 }
             },
         });
-
+        Chart.defaults.global.legend.display = false;
         myDifferentialChart = new Chart(salaryDifferentialChart, {
 
                     type: 'bar',
